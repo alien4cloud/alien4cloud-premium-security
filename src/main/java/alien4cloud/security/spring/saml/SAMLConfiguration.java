@@ -6,8 +6,6 @@ import alien4cloud.security.spring.Alien4CloudAuthenticationProvider;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
-
-import alien4cloud.security.spring.FailureAuthenticationEntryPoint;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -261,23 +259,8 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // configure the HttpSecurity
-        http.authorizeRequests().antMatchers("/*").permitAll();
-        http.authorizeRequests().antMatchers("/static/tosca/**").hasAnyAuthority("ADMIN", "COMPONENTS_MANAGER", "COMPONENTS_BROWSER");
-        http.authorizeRequests().antMatchers("/rest/alienEndPoint/**").authenticated();
-        http.authorizeRequests().antMatchers("/rest/admin/**").hasAuthority("ADMIN");
-        http.authorizeRequests().antMatchers("/rest/audit/**").hasAuthority("ADMIN");
-
-        http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
-        http.exceptionHandling().authenticationEntryPoint(new FailureAuthenticationEntryPoint());
-
-        http.logout().logoutSuccessUrl("/");
-
+        AuthorizationUtil.configure(http);
         http.httpBasic().authenticationEntryPoint(samlEntryPoint());
-
-        http.formLogin().defaultSuccessUrl("/rest/auth/status").failureUrl("/rest/auth/authenticationfailed").loginProcessingUrl("/login")
-                .usernameParameter("username").passwordParameter("password").permitAll().and().logout().logoutSuccessUrl("/").deleteCookies("JSESSIONID");
-
-        http.csrf().disable();
         http.addFilterBefore(metadataGeneratorFilter(), ChannelProcessingFilter.class).addFilterAfter(samlFilter(), BasicAuthenticationFilter.class);
     }
 
