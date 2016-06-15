@@ -1,11 +1,11 @@
 package alien4cloud.security.spring.saml;
 
-import alien4cloud.security.AuthorizationUtil;
-import alien4cloud.security.spring.Alien4CloudAccessDeniedHandler;
-import alien4cloud.security.spring.Alien4CloudAuthenticationProvider;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -16,27 +16,13 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.saml.SAMLAuthenticationProvider;
-import org.springframework.security.saml.SAMLBootstrap;
-import org.springframework.security.saml.SAMLEntryPoint;
-import org.springframework.security.saml.SAMLLogoutFilter;
-import org.springframework.security.saml.SAMLLogoutProcessingFilter;
-import org.springframework.security.saml.SAMLProcessingFilter;
-import org.springframework.security.saml.SAMLWebSSOHoKProcessingFilter;
+import org.springframework.security.saml.*;
 import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.security.saml.log.SAMLDefaultLogger;
 import org.springframework.security.saml.metadata.MetadataDisplayFilter;
 import org.springframework.security.saml.metadata.MetadataGenerator;
 import org.springframework.security.saml.metadata.MetadataGeneratorFilter;
-import org.springframework.security.saml.websso.SingleLogoutProfile;
-import org.springframework.security.saml.websso.SingleLogoutProfileImpl;
-import org.springframework.security.saml.websso.WebSSOProfile;
-import org.springframework.security.saml.websso.WebSSOProfileConsumer;
-import org.springframework.security.saml.websso.WebSSOProfileConsumerHoKImpl;
-import org.springframework.security.saml.websso.WebSSOProfileConsumerImpl;
-import org.springframework.security.saml.websso.WebSSOProfileECPImpl;
-import org.springframework.security.saml.websso.WebSSOProfileImpl;
-import org.springframework.security.saml.websso.WebSSOProfileOptions;
+import org.springframework.security.saml.websso.*;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -49,6 +35,10 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import alien4cloud.security.AuthorizationUtil;
+import alien4cloud.security.spring.Alien4CloudAccessDeniedHandler;
+import alien4cloud.security.spring.Alien4CloudAuthenticationProvider;
+
 @Configuration
 @ConditionalOnProperty(value = "saml.enabled", havingValue = "true")
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -60,6 +50,10 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
     private SAMLUserDetailServiceImpl samlUserDetailsServiceImpl;
     @Inject
     private MetadataGenerator metadataGenerator;
+    @Value("${saml.maxAuthenticationAge:null}")
+    private Long maxAuthenticationAge;
+    @Value("${saml.maxAssertionTime:null}")
+    private Integer maxAssertionTime;
 
     // SAML Authentication Provider responsible for validating of received SAML messages
     @Bean
@@ -91,6 +85,9 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
     // SAML 2.0 WebSSO Assertion Consumer
     @Bean
     public WebSSOProfileConsumer webSSOprofileConsumer() {
+        WebSSOProfileConsumerImpl consumer = new WebSSOProfileConsumerImpl();
+        consumer.setMaxAuthenticationAge(maxAuthenticationAge);
+        consumer.setMaxAssertionTime(maxAssertionTime);
         return new WebSSOProfileConsumerImpl();
     }
 
