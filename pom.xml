@@ -6,7 +6,6 @@
     <version>1.2.0-SM5</version>
   </parent>
   <artifactId>alien4cloud-premium-security</artifactId>
-  <version>1.2.0-SM5</version>
   <name>Alien 4 Cloud Premium Security</name>
   <description>Provides enterprise security features.</description>
 
