@@ -9,6 +9,10 @@
   <name>Alien 4 Cloud Premium Security</name>
   <description>Provides enterprise security features.</description>
 
+  <scm>
+    <connection>scm:git:https://fastconnect.org/gitlab/alien4cloud/alien4cloud-premium-security.git</connection>
+  </scm>
+
   <distributionManagement>
       <repository>
           <id>repo.internal.fastconnect.org</id>
