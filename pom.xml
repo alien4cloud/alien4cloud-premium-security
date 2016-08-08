@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>alien4cloud</groupId>
@@ -8,20 +9,21 @@
   <artifactId>alien4cloud-premium-security</artifactId>
   <name>Alien 4 Cloud Premium Security</name>
   <description>Provides enterprise security features.</description>
+  <version>1.2.1</version>
 
   <scm>
     <connection>scm:git:https://fastconnect.org/gitlab/alien4cloud/alien4cloud-premium-security.git</connection>
   </scm>
 
   <distributionManagement>
-      <repository>
-          <id>repo.internal.fastconnect.org</id>
-          <url>https://fastconnect.org/maven/content/repositories/fastconnect</url>
-      </repository>
-      <snapshotRepository>
-          <id>repo.internal.snapshot.fastconnect.org</id>
-          <url>https://fastconnect.org/maven/content/repositories/fastconnect-snapshot</url>
-      </snapshotRepository>
+    <repository>
+      <id>repo.internal.fastconnect.org</id>
+      <url>https://fastconnect.org/maven/content/repositories/fastconnect</url>
+    </repository>
+    <snapshotRepository>
+      <id>repo.internal.snapshot.fastconnect.org</id>
+      <url>https://fastconnect.org/maven/content/repositories/fastconnect-snapshot</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <properties>
@@ -36,7 +38,7 @@
     <dependency>
       <groupId>alien4cloud</groupId>
       <artifactId>alien4cloud-security</artifactId>
-      <version>${project.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -67,4 +69,53 @@
       <artifactId>spring-test</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.4.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <includes>
+                  <include>org.springframework.security.extensions:spring-security-saml2-core</include>
+                  <include>org.opensaml:opensaml</include>
+                  <include>org.opensaml:openws</include>
+                  <include>org.opensaml:xmltooling</include>
+                  <include>org.bouncycastle:bcprov-jdk15</include>
+                  <include>ca.juliusdavies:not-yet-commons-ssl</include>
+                  <include>org.apache.santuario:xmlsec</include>
+                  <include>commons-httpclient:commons-httpclient</include>
+                  <include>org.owasp.esapi:esapi</include>
+                  <include>joda-time:joda-time</include>
+                  <include>xerces:xercesImpl</include>
+                  <include>xalan:serializer</include>
+                  <include>xml-resolver:xml-resolver</include>
+                  <include>xalan:xalan</include>
+                  <include>xml-apis:xml-apis</include>
+                </includes>
+              </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

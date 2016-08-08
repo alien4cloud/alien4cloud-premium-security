@@ -5,11 +5,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import alien4cloud.security.spring.A4CPremiumAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -50,10 +52,8 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
     private SAMLUserDetailServiceImpl samlUserDetailsServiceImpl;
     @Inject
     private MetadataGenerator metadataGenerator;
-    @Value("${saml.maxAuthenticationAge:null}")
-    private Long maxAuthenticationAge;
-    @Value("${saml.maxAssertionTime:null}")
-    private Integer maxAssertionTime;
+    @Inject
+    private Alien4CloudAuthenticationProvider alienAuthenticationProvider = null;
 
     // SAML Authentication Provider responsible for validating of received SAML messages
     @Bean
@@ -66,7 +66,7 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
 
     // Provider of default SAML Context
     @Bean
-    public SAMLContextProviderImpl contextProvider() {
+    public static SAMLContextProviderImpl contextProvider() {
         return new SAMLContextProviderImpl();
     }
 
@@ -78,17 +78,22 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
 
     // Logger for SAML messages and events
     @Bean
-    public SAMLDefaultLogger samlLogger() {
+    public static SAMLDefaultLogger samlLogger() {
         return new SAMLDefaultLogger();
     }
 
     // SAML 2.0 WebSSO Assertion Consumer
     @Bean
-    public WebSSOProfileConsumer webSSOprofileConsumer() {
+    public static WebSSOProfileConsumer webSSOprofileConsumer(@Value("${saml.maxAuthenticationAge:null}") Long maxAuthenticationAge,
+            @Value("${saml.maxAssertionTime:null}") Integer maxAssertionTime) {
         WebSSOProfileConsumerImpl consumer = new WebSSOProfileConsumerImpl();
-        consumer.setMaxAuthenticationAge(maxAuthenticationAge);
-        consumer.setMaxAssertionTime(maxAssertionTime);
-        return new WebSSOProfileConsumerImpl();
+        if (maxAuthenticationAge != null) {
+            consumer.setMaxAuthenticationAge(maxAuthenticationAge);
+        }
+        if (maxAssertionTime != null) {
+            consumer.setMaxAssertionTime(maxAssertionTime);
+        }
+        return consumer;
     }
 
     // SAML 2.0 Holder-of-Key WebSSO Assertion Consumer
@@ -262,8 +267,12 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public Alien4CloudAuthenticationProvider alienAuthenticationProvider() {
-        return new Alien4CloudAuthenticationProvider();
+    @Primary
+    public Alien4CloudAuthenticationProvider authenticationProvider() {
+        if (alienAuthenticationProvider == null) {
+            alienAuthenticationProvider = new A4CPremiumAuthenticationProvider();
+        }
+        return alienAuthenticationProvider;
     }
 
     /**
@@ -274,6 +283,6 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(alienAuthenticationProvider());
+        auth.authenticationProvider(authenticationProvider());
     }
 }
