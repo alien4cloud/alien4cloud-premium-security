@@ -7,6 +7,7 @@ import java.util.Timer;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpClient;
 import org.opensaml.saml2.metadata.provider.*;
 import org.opensaml.xml.parse.StaticBasicParserPool;
@@ -22,6 +23,7 @@ import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
 /**
  * Configuration of SAML meta data.
  */
+@Slf4j
 @ConditionalOnProperty(value = "saml.enabled", havingValue = "true")
 @Configuration
 public class MetadataConfiguration {
@@ -48,16 +50,25 @@ public class MetadataConfiguration {
     public ExtendedMetadataDelegate ssoCircleExtendedMetadataProvider() throws MetadataProviderException {
         Timer backgroundTaskTimer = new Timer(true);
         AbstractMetadataProvider metadataProvider;
+        if (idpMetadataURL != null && idpMetadataURL.equals("null")) {
+            idpMetadataURL = null;
+        }
+        if (idpMetadataFile != null && idpMetadataFile.equals("null")) {
+            idpMetadataFile = null;
+        }
+
         if (idpMetadataURL == null) {
+            // load from file
+            metadataProvider = new FilesystemMetadataProvider(backgroundTaskTimer, Paths.get(idpMetadataFile).toFile());
+        } else {
             if (idpMetadataFile == null) {
                 metadataProvider = new HTTPMetadataProvider(backgroundTaskTimer, httpClient, idpMetadataURL);
             } else {
                 metadataProvider = new FileBackedHTTPMetadataProvider(backgroundTaskTimer, httpClient, idpMetadataURL, idpMetadataFile);
             }
-        } else {
-            // load from file
-            metadataProvider = new FilesystemMetadataProvider(backgroundTaskTimer, Paths.get(idpMetadataFile).toFile());
         }
+        log.info("Initializing SAML configuration idp metadata url {}/{}, idp metadata file {}/{}, {}", idpMetadataURL, idpMetadataURL == null, idpMetadataFile,
+                idpMetadataFile == null, metadataProvider);
         metadataProvider.setParserPool(parserPool);
         ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(metadataProvider, extendedMetadata());
         extendedMetadataDelegate.setMetadataTrustCheck(true);
