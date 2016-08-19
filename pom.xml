@@ -7,6 +7,7 @@
     <version>1.3.0-SM3-SNAPSHOT</version>
   </parent>
   <artifactId>alien4cloud-premium-security</artifactId>
+  <version>1.3.0-SM3-SNAPSHOT</version>
   <name>Alien 4 Cloud Premium Security</name>
   <description>Provides enterprise security features.</description>
 
@@ -24,7 +25,7 @@
       <url>https://fastconnect.org/maven/content/repositories/fastconnect-snapshot</url>
     </snapshotRepository>
   </distributionManagement>
-  
+
   <dependencies>
     <dependency>
       <groupId>alien4cloud</groupId>
@@ -60,4 +61,30 @@
       <artifactId>spring-test</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>external.atlassian.jgitflow</groupId>
+        <artifactId>jgitflow-maven-plugin</artifactId>
+        <version>1.0-m5.1-alien</version>
+      </plugin>
+    </plugins>
+  </build>
 </project>
