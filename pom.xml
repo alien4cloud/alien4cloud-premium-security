@@ -3,10 +3,10 @@
   <parent>
     <groupId>alien4cloud</groupId>
     <artifactId>alien4cloud-parent</artifactId>
-    <version>1.3.0-SM3</version>
+    <version>1.3.0-SM4</version>
   </parent>
   <artifactId>alien4cloud-premium-security</artifactId>
-  <version>1.3.0-SM3</version>
+  <version>1.3.0-SM4</version>
   <name>Alien 4 Cloud Premium Security</name>
   <description>Provides enterprise security features.</description>
 
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>org.springframework.security.extensions</groupId>
       <artifactId>spring-security-saml2-core</artifactId>
-      <version>1.0.1.RELEASE</version>
+      <version>1.0.2.RELEASE</version>
     </dependency>
 
     <!-- tests -->
@@ -83,6 +83,50 @@
         <groupId>external.atlassian.jgitflow</groupId>
         <artifactId>jgitflow-maven-plugin</artifactId>
         <version>1.0-m5.1-alien</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.4.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <includes>
+                  <include>org.springframework.security.extensions:spring-security-saml2-core</include>
+                  <include>org.opensaml:opensaml</include>
+                  <include>org.opensaml:openws</include>
+                  <include>org.opensaml:xmltooling</include>
+                  <include>org.bouncycastle:bcprov-jdk15</include>
+                  <include>ca.juliusdavies:not-yet-commons-ssl</include>
+                  <include>org.apache.santuario:xmlsec</include>
+                  <include>commons-httpclient:commons-httpclient</include>
+                  <include>org.owasp.esapi:esapi</include>
+                  <include>joda-time:joda-time</include>
+                  <include>xerces:xercesImpl</include>
+                  <include>xalan:serializer</include>
+                  <include>xml-resolver:xml-resolver</include>
+                  <include>xalan:xalan</include>
+                  <include>xml-apis:xml-apis</include>
+                </includes>
+              </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
