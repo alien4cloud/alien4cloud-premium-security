@@ -47,10 +47,6 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
     @Inject
     private Alien4CloudAuthenticationProvider alienAuthenticationProvider = null;
     @Inject
-    private SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler;
-    @Inject
-    private SimpleUrlAuthenticationFailureHandler authenticationFailureHandler;
-    @Inject
     private SAMLEntryPoint samlEntryPoint;
     @Inject
     private SAMLLogoutFilter samlLogoutFilter;
@@ -60,22 +56,10 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
     private MetadataGeneratorFilter metadataGeneratorFilter;
     @Inject
     private SAMLLogoutProcessingFilter samlLogoutProcessingFilter;
-
-    private SAMLWebSSOHoKProcessingFilter samlWebSSOHoKProcessingFilter() throws Exception {
-        SAMLWebSSOHoKProcessingFilter samlWebSSOHoKProcessingFilter = new SAMLWebSSOHoKProcessingFilter();
-        samlWebSSOHoKProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler);
-        samlWebSSOHoKProcessingFilter.setAuthenticationManager(authenticationManager());
-        samlWebSSOHoKProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
-        return samlWebSSOHoKProcessingFilter;
-    }
-
-    private SAMLProcessingFilter samlWebSSOProcessingFilter() throws Exception {
-        SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
-        samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
-        samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler);
-        samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
-        return samlWebSSOProcessingFilter;
-    }
+    @Inject
+    private SAMLWebSSOHoKProcessingFilter samlWebSSOHoKProcessingFilter;
+    @Inject
+    private SAMLProcessingFilter samlWebSSOProcessingFilter;
 
     /**
      * Returns the authentication manager currently used by Spring.
@@ -98,14 +82,16 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        samlWebSSOHoKProcessingFilter.setAuthenticationManager(authenticationManager());
+        samlWebSSOProcessingFilter.setAuthenticationManager(authenticationManager());
 
         // Define the security filter chain in order to support SSO Auth by using SAML 2.0
         List<SecurityFilterChain> chains = new ArrayList<SecurityFilterChain>();
         chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"), samlEntryPoint));
         chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/logout/**"), samlLogoutFilter));
         chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"), metadataDisplayFilter));
-        chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SSO/**"), samlWebSSOProcessingFilter()));
-        chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SSOHoK/**"), samlWebSSOHoKProcessingFilter()));
+        chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SSO/**"), samlWebSSOProcessingFilter));
+        chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SSOHoK/**"), samlWebSSOHoKProcessingFilter));
         chains.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SingleLogout/**"), samlLogoutProcessingFilter));
         FilterChainProxy samlFilters = new FilterChainProxy(chains);
 

@@ -3,6 +3,7 @@ package alien4cloud.security.spring.saml;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
@@ -10,6 +11,8 @@ import org.springframework.security.saml.SAMLBootstrap;
 import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.SAMLLogoutFilter;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
+import org.springframework.security.saml.SAMLProcessingFilter;
+import org.springframework.security.saml.SAMLWebSSOHoKProcessingFilter;
 import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.security.saml.log.SAMLDefaultLogger;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
@@ -31,6 +34,7 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
  * Configuration of base SAML beans.
  */
 @Configuration
+@ConditionalOnProperty(value = "saml.enabled", havingValue = "true")
 public class SAMLBaseConfiguration {
     @Inject
     private SAMLUserDetailServiceImpl samlUserDetailsServiceImpl;
@@ -174,5 +178,27 @@ public class SAMLBaseConfiguration {
         SAMLEntryPoint samlEntryPoint = new SAMLEntryPoint();
         samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions());
         return samlEntryPoint;
+    }
+
+    @Bean
+    public SAMLWebSSOHoKProcessingFilter samlWebSSOHoKProcessingFilter(SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler,
+            SimpleUrlAuthenticationFailureHandler authenticationFailureHandler) throws Exception {
+        SAMLWebSSOHoKProcessingFilter samlWebSSOHoKProcessingFilter = new SAMLWebSSOHoKProcessingFilter();
+        // authentication manager will be set later in the SAMLConfiguration bean. We need lazy setting here but spring checks if not null in afterPropertiesSet
+        samlWebSSOHoKProcessingFilter.setAuthenticationManager(authentication -> null);
+        samlWebSSOHoKProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler);
+        samlWebSSOHoKProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
+        return samlWebSSOHoKProcessingFilter;
+    }
+
+    @Bean
+    public SAMLProcessingFilter samlWebSSOProcessingFilter(SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler,
+            SimpleUrlAuthenticationFailureHandler authenticationFailureHandler) throws Exception {
+        SAMLProcessingFilter samlWebSSOProcessingFilter = new SAMLProcessingFilter();
+        // authentication manager will be set later in the SAMLConfiguration bean. We need lazy setting here but spring checks if not null in afterPropertiesSet
+        samlWebSSOProcessingFilter.setAuthenticationManager(authentication -> null);
+        samlWebSSOProcessingFilter.setAuthenticationSuccessHandler(successRedirectHandler);
+        samlWebSSOProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
+        return samlWebSSOProcessingFilter;
     }
 }
