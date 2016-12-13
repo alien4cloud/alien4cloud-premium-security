@@ -29,6 +29,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -60,6 +61,8 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
     private SAMLWebSSOHoKProcessingFilter samlWebSSOHoKProcessingFilter;
     @Inject
     private SAMLProcessingFilter samlWebSSOProcessingFilter;
+    @Inject
+    private SimpleUrlLogoutSuccessHandler successLogoutHandler;
 
     /**
      * Returns the authentication manager currently used by Spring.
@@ -96,7 +99,7 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
         FilterChainProxy samlFilters = new FilterChainProxy(chains);
 
         // configure the HttpSecurity
-        AuthorizationUtil.configure(http);
+        AuthorizationUtil.configure(http, successLogoutHandler);
         http.httpBasic().authenticationEntryPoint(samlEntryPoint);
         http.addFilterBefore(metadataGeneratorFilter, ChannelProcessingFilter.class).addFilterAfter(samlFilters, BasicAuthenticationFilter.class);
     }
