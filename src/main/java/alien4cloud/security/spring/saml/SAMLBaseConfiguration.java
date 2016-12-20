@@ -39,6 +39,9 @@ public class SAMLBaseConfiguration {
     @Inject
     private SAMLUserDetailServiceImpl samlUserDetailsServiceImpl;
 
+    @Value("${saml.logoutUrl:#{null}}")
+    private String logoutRedirectUrl;
+
     // SAML Authentication Provider responsible for validating of received SAML messages
     @Bean
     public SAMLAuthenticationProvider samlAuthenticationProvider() {
@@ -59,7 +62,8 @@ public class SAMLBaseConfiguration {
     @Bean
     public SimpleUrlLogoutSuccessHandler successLogoutHandler() {
         SimpleUrlLogoutSuccessHandler successLogoutHandler = new SimpleUrlLogoutSuccessHandler();
-        successLogoutHandler.setDefaultTargetUrl("/");
+        String targetLogoutUrl = logoutRedirectUrl == null ? "/" : logoutRedirectUrl;
+        successLogoutHandler.setDefaultTargetUrl(targetLogoutUrl);
         return successLogoutHandler;
     }
 
