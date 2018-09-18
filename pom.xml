@@ -3,10 +3,10 @@
   <parent>
     <groupId>alien4cloud</groupId>
     <artifactId>alien4cloud-parent</artifactId>
-    <version>1.4.5</version>
+    <version>1.4.6-SNAPSHOT</version>
   </parent>
   <artifactId>alien4cloud-premium-security</artifactId>
-  <version>1.4.5</version>
+  <version>1.4.6-SNAPSHOT</version>
   <name>Alien 4 Cloud Premium Security</name>
   <description>Provides enterprise security features.</description>
 
