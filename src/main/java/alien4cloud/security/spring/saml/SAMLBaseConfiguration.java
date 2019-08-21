@@ -96,14 +96,24 @@ public class SAMLBaseConfiguration {
 
     // SAML 2.0 WebSSO Assertion Consumer
     @Bean
-    public static WebSSOProfileConsumer webSSOprofileConsumer(@Value("${saml.maxAuthenticationAge:null}") Long maxAuthenticationAge,
-            @Value("${saml.maxAssertionTime:null}") Integer maxAssertionTime) {
+    public static WebSSOProfileConsumer webSSOprofileConsumer(
+            @Value("${saml.maxAuthenticationAge:null}") Long maxAuthenticationAge,
+            @Value("${saml.maxAssertionTime:null}") Integer maxAssertionTime,
+            @Value("${saml.responseSkew:null}") Integer responseSkew,
+            @Value("${saml.includeAllAttributes:null}") Boolean includeAllAttributes
+            ) {
         WebSSOProfileConsumerImpl consumer = new WebSSOProfileConsumerImpl();
         if (maxAuthenticationAge != null) {
             consumer.setMaxAuthenticationAge(maxAuthenticationAge);
         }
         if (maxAssertionTime != null) {
             consumer.setMaxAssertionTime(maxAssertionTime);
+        }
+        if (responseSkew != null) {
+            consumer.setResponseSkew(responseSkew);
+        }
+        if (includeAllAttributes != null) {
+            consumer.setIncludeAllAttributes(includeAllAttributes);
         }
         return consumer;
     }
