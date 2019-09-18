@@ -99,8 +99,8 @@ public class SAMLBaseConfiguration {
     public static WebSSOProfileConsumer webSSOprofileConsumer(
             @Value("${saml.maxAuthenticationAge:null}") Long maxAuthenticationAge,
             @Value("${saml.maxAssertionTime:null}") Integer maxAssertionTime,
-            @Value("${saml.responseSkew:null}") Integer responseSkew,
-            @Value("${saml.includeAllAttributes:null}") Boolean includeAllAttributes
+            @Value("${saml.responseSkew:60}") Integer responseSkew,
+            @Value("${saml.includeAllAttributes:false}") Boolean includeAllAttributes
             ) {
         WebSSOProfileConsumerImpl consumer = new WebSSOProfileConsumerImpl();
         if (maxAuthenticationAge != null) {
