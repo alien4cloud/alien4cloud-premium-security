@@ -2,6 +2,7 @@ package alien4cloud.security.spring.saml;
 
 import javax.inject.Inject;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +14,9 @@ import org.springframework.security.saml.SAMLLogoutFilter;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
 import org.springframework.security.saml.SAMLProcessingFilter;
 import org.springframework.security.saml.SAMLWebSSOHoKProcessingFilter;
+import org.springframework.security.saml.context.SAMLContextProvider;
 import org.springframework.security.saml.context.SAMLContextProviderImpl;
+import org.springframework.security.saml.context.SAMLContextProviderLB;
 import org.springframework.security.saml.log.SAMLDefaultLogger;
 import org.springframework.security.saml.websso.SingleLogoutProfile;
 import org.springframework.security.saml.websso.SingleLogoutProfileImpl;
@@ -33,6 +36,7 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 /**
  * Configuration of base SAML beans.
  */
+@Slf4j
 @Configuration
 @ConditionalOnProperty(value = "saml.enabled", havingValue = "true")
 public class SAMLBaseConfiguration {
@@ -41,6 +45,18 @@ public class SAMLBaseConfiguration {
 
     @Value("${saml.logoutUrl:#{null}}")
     private String logoutRedirectUrl;
+
+    @Value("${saml.ctxProvider.contextPath:#{null}}")
+    private static String samlCtxProviderContextPath;
+
+    @Value("${saml.ctxProvider.serverName:#{null}}")
+    private static String samlCtxProviderServerName;
+
+    @Value("${saml.ctxProvider.scheme:#{null}}")
+    private static String samlCtxProviderScheme;
+
+    @Value("${saml.ctxProvider.serverPort:#{null}}")
+    private static Integer samlCtxProviderServerPort;
 
     // SAML Authentication Provider responsible for validating of received SAML messages
     @Bean
@@ -78,8 +94,21 @@ public class SAMLBaseConfiguration {
 
     // Provider of default SAML Context
     @Bean
-    public static SAMLContextProviderImpl contextProvider() {
-        return new SAMLContextProviderImpl();
+    public static SAMLContextProvider contextProvider() {
+        if (samlCtxProviderServerName != null && samlCtxProviderScheme != null) {
+            log.info("SAML Context provider scheme, server name provided : {}://{}, will use SAMLContextProviderLB as SAMLContextProvider", samlCtxProviderScheme, samlCtxProviderServerName);
+            SAMLContextProviderLB samlContextProvider = new SAMLContextProviderLB();
+            samlContextProvider.setScheme(samlCtxProviderScheme);
+            samlContextProvider.setServerName(samlCtxProviderServerName);
+            samlContextProvider.setContextPath(samlCtxProviderContextPath);
+            if (samlCtxProviderServerPort != null) {
+                samlContextProvider.setServerPort(samlCtxProviderServerPort);
+            }
+            return samlContextProvider;
+        } else {
+            log.info("No SAML Context provider scheme, server name provided, will use SAMLContextProviderImpl as SAMLContextProvider");
+            return new SAMLContextProviderImpl();
+        }
     }
 
     // Initialization of OpenSAML library
