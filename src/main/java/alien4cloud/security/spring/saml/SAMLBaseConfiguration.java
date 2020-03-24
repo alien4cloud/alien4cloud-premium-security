@@ -46,6 +46,12 @@ public class SAMLBaseConfiguration {
     @Value("${saml.logoutUrl:#{null}}")
     private String logoutRedirectUrl;
 
+    @Value("${saml.loginSuccesstUrl:#{null}}")
+    private String loginSuccesstUrl;
+
+    @Value("${saml.loginFailedtUrl:#{null}}")
+    private String loginFailedtUrl;
+
     // SAML Authentication Provider responsible for validating of received SAML messages
     @Bean
     public SAMLAuthenticationProvider samlAuthenticationProvider() {
@@ -187,7 +193,7 @@ public class SAMLBaseConfiguration {
     @Bean
     public SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler() {
         SavedRequestAwareAuthenticationSuccessHandler successRedirectHandler = new SavedRequestAwareAuthenticationSuccessHandler();
-        successRedirectHandler.setDefaultTargetUrl("/");
+        successRedirectHandler.setDefaultTargetUrl((loginSuccesstUrl == null) ? "/" : loginSuccesstUrl);
         return successRedirectHandler;
     }
 
@@ -196,7 +202,7 @@ public class SAMLBaseConfiguration {
     public SimpleUrlAuthenticationFailureHandler authenticationFailureHandler() {
         SimpleUrlAuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
         failureHandler.setUseForward(true);
-        failureHandler.setDefaultFailureUrl("/");
+        failureHandler.setDefaultFailureUrl((loginFailedtUrl == null) ? "/" : loginFailedtUrl);
         return failureHandler;
     }
 
