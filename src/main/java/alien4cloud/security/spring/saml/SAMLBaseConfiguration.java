@@ -46,18 +46,6 @@ public class SAMLBaseConfiguration {
     @Value("${saml.logoutUrl:#{null}}")
     private String logoutRedirectUrl;
 
-    @Value("${saml.ctxProvider.contextPath:#{null}}")
-    private static String samlCtxProviderContextPath;
-
-    @Value("${saml.ctxProvider.serverName:#{null}}")
-    private static String samlCtxProviderServerName;
-
-    @Value("${saml.ctxProvider.scheme:#{null}}")
-    private static String samlCtxProviderScheme;
-
-    @Value("${saml.ctxProvider.serverPort:#{null}}")
-    private static Integer samlCtxProviderServerPort;
-
     // SAML Authentication Provider responsible for validating of received SAML messages
     @Bean
     public SAMLAuthenticationProvider samlAuthenticationProvider() {
@@ -94,7 +82,12 @@ public class SAMLBaseConfiguration {
 
     // Provider of default SAML Context
     @Bean
-    public static SAMLContextProvider contextProvider() {
+    public static SAMLContextProvider contextProvider(
+            @Value("${saml.ctxProvider.contextPath:#{null}}") String samlCtxProviderContextPath,
+            @Value("${saml.ctxProvider.serverName:#{null}}") String samlCtxProviderServerName,
+            @Value("${saml.ctxProvider.scheme:#{null}}") String samlCtxProviderScheme,
+            @Value("${saml.ctxProvider.serverPort:#{null}}") Integer samlCtxProviderServerPort
+    ) {
         if (samlCtxProviderServerName != null && samlCtxProviderScheme != null) {
             log.info("SAML Context provider scheme, server name provided : {}://{}, will use SAMLContextProviderLB as SAMLContextProvider", samlCtxProviderScheme, samlCtxProviderServerName);
             SAMLContextProviderLB samlContextProvider = new SAMLContextProviderLB();
