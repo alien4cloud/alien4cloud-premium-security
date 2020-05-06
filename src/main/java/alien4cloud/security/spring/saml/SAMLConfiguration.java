@@ -45,8 +45,8 @@ import alien4cloud.security.spring.Alien4CloudAuthenticationProvider;
 public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
     @Inject
     private Alien4CloudAccessDeniedHandler accessDeniedHandler;
-    @Inject
-    private Alien4CloudAuthenticationProvider alienAuthenticationProvider = null;
+
+    private Alien4CloudAuthenticationProvider alienAuthenticationProvider = new A4CPremiumAuthenticationProvider();
     @Inject
     private SAMLEntryPoint samlEntryPoint;
     @Inject
@@ -107,9 +107,6 @@ public class SAMLConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     @Primary
     public Alien4CloudAuthenticationProvider authenticationProvider() {
-        if (alienAuthenticationProvider == null) {
-            alienAuthenticationProvider = new A4CPremiumAuthenticationProvider();
-        }
         return alienAuthenticationProvider;
     }
 
